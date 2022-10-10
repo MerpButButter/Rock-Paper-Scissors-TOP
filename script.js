@@ -1,4 +1,11 @@
-let promptPlr
+let buttonChoices = Array.from(document.querySelector(".choices").getElementsByTagName("button"));
+
+let scoreBoard = document.querySelector(".score-board");
+
+let promptPlr;
+
+let playerScore;
+let computerScore;
 const movesCombinations = {
     rock: {
         rock: "tie",
@@ -15,29 +22,30 @@ const movesCombinations = {
         paper: "win",
         scissors: "tie",
     },
-}
+};
+
 
 
 const regEx = {
     scissors: /^Scissors$/i,
     rock: /^Rock$/i,
     paper: /^Paper$/i,
-}
+};
 
 const resultMessage = {
     lose: "You lose!",
     win: "You win!",
     tie: "You tie!",
-}
+};
 
 
 function getCompChoice() {
-    let randomNum = Math.random()
+    let randomNum = Math.random();
 
     return (randomNum < .33) ? "Rock" :
         (randomNum < .66) ? "Paper" :
             (randomNum < .99) ? "Scissors" :
-                "Rock"
+                "Rock";
 }
 
 
@@ -48,60 +56,57 @@ function playRound(playerSelection, compSelection) {
 
     let result = movesCombinations[player][computer];
 
-    return ([resultMessage[result] + ` Player threw ${player} and computer threw ${computer}.`, result])
+    return ([resultMessage[result] + ` Player threw ${player} and computer threw ${computer}.`, result]);
 }
 
 
 function insensitive(string) {
     if (typeof (string) === "string") {
-        return string.toLowerCase()
+        return string.toLowerCase();
     }
 }
 
+let doneGame;
 function game() {
-    let playerScore = 0
-    let computerScore = 0
-
-    while (true) {
-        if (playerScore >= 5) {
-            alert("You beat the computer!")
-            break
-        } else if (computerScore >= 5) {
-            alert("You lost to the computer!")
-            break
-        }
-
-        let playerChoice = promptPlayer()
+    doneGame = false;
+    playerScore = 0;
+    computerScore = 0;
 
 
-        let roundData = playRound(playerChoice, getCompChoice())
-        let result = roundData[1]
-
-        if (result === "lose") {
-            computerScore++
-        } else if (result === "win") {
-            playerScore++
-        }
-
-        console.log(roundData[0], `${playerScore} for player and ${computerScore} for pc.`)
-    }
-
+    buttonChoices.forEach((btn) => {
+        btn.addEventListener('click', btnChoice);
+    });
 }
 
+function btnChoice(e) {
+    let btn = this;
+    if (playerScore >= 5) {
+        alert("You beat the computer!");
+        buttonChoices.forEach((btn) => {
+            btn.removeEventListener('click', btnChoice);
+        });
+        doneGame = true;
+        return;
+    } else if (computerScore >= 5) {
+        alert('You lost to the computer!');
+        buttonChoices.forEach((btn) => {
+            btn.removeEventListener('click', btnChoice);
+        });
+        doneGame = true;
+        return;
+    }
 
-const askString = "Rock, Paper or Scissors;"
-function promptPlayer() {
+    if (!doneGame) {
+        let result = playRound(btn.innerText.toLowerCase(), getCompChoice());
+        scoreBoard.innerText = (result[0] + `\n${playerScore} for player and ${computerScore} for pc.`);
 
-    promptPlr = prompt(askString)
 
-    if (
-        regEx["rock"].test(promptPlr) ||
-        regEx["paper"].test(promptPlr) ||
-        regEx["scissors"].test(promptPlr)
-    ) {
-        return promptPlr
-    } else {
-        promptPlayer()
-        return promptPlr
+        if (result[1] === "lose") {
+            computerScore++;
+        } else if (result[1] === "win") {
+            playerScore++;
+        }
     }
 }
+
+game()
